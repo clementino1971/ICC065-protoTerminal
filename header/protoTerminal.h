@@ -6,5 +6,5 @@
 #include <string.h>
 
 
-void ls();
+void ls(const char *dir); //operação de list, nao print com cores difernetes nem em colunas
 #endif
