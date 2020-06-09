@@ -20,5 +20,10 @@ void ls(const char *dir){
 		printf("%s \n", namelist->d_name);
 	}
 	printf("\n");
+}
 
+void pwd(){
+    char cwd[FILENAME_MAX];
+    getcwd(cwd, sizeof(cwd));
+    printf("%s\n", cwd);
 }
