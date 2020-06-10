@@ -4,7 +4,7 @@
 //     if(argc == 1) ls(".");
 // 	else ls(argv[1]);
 
-void ls(const char *dir){
+void ls( char *dir){
 	struct dirent *namelist;
 	DIR *drt =opendir(dir);
 	if(!drt){
@@ -17,13 +17,12 @@ void ls(const char *dir){
 	}
 	while ((namelist = readdir(drt)) != NULL){
 		if(namelist->d_name[0] == '.') continue;
-		printf("%s \n", namelist->d_name);
+		std::cout << namelist->d_name << "\n";
 	}
-	printf("\n");
+	std::cout << "\n";
 }
 
-void pwd(){
-    char cwd[FILENAME_MAX];
-    getcwd(cwd, sizeof(cwd));
-    printf("%s\n", cwd);
+void pwd(char *dir){
+    std::cout << dir << "\n\n";
+
 }

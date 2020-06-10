@@ -10,12 +10,14 @@
 #include<map>
 #include<vector>
 #include<sstream>
+#include "./header/commands.h"
 
 using namespace std;
 
 //Map to store the function pointers
-map<string,void(*)()> mapa;
+map<string,void(*)(char(*))> mapa;
 bool TERMINAL = true;
+char dir[FILENAME_MAX];
 
 void runCommand(vector<string> command){
 	
@@ -27,9 +29,9 @@ void runCommand(vector<string> command){
 
 	//run special functions
 	if(mapa.find(command[0]) != mapa.end()){
-		void (*choice)();
+		void (*choice)(char(*));
 		choice = mapa[command[0]];
-		choice();
+		choice(dir);
 	}else{
 		//run others functions
 	}
@@ -41,17 +43,19 @@ void runCommand(vector<string> command){
 int main(int argc, char *argv[]){
 	
 	//Define Functions here	
-	//mapa["ls"] = 
+	mapa["ls"] = &ls;
 	//mapa["cd"] = 
-	//mapa["pwd"] =	
+	mapa["pwd"] = &pwd;	
 	
 	//Strings
 	string currCommand;
-	string dir = "~/";
 
 
 	while(TERMINAL){
 		
+		//Get current dir
+		getcwd(dir,sizeof(dir));
+
 		//Vector to store the words in a command
 		vector<string> command;
 
@@ -65,7 +69,7 @@ int main(int argc, char *argv[]){
 	       	do{
 			string word;
 			ss >> word;
-
+			
 			command.push_back(word);
 		}while(ss);	
 		
