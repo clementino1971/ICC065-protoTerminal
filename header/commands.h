@@ -1,5 +1,5 @@
-#ifndef PROTOTERMINAL_H
-#define PROTOTERMINAL_H
+#ifndef COMMANDS_H
+#define COMMANDS_H
 
 #include<stdio.h>
 #include<string.h>

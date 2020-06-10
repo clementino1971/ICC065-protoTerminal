@@ -1,4 +1,4 @@
-#include "protoTerminal.h"
+#include "../header/commands.h"
 
 // deve ser colcado na main 
 //     if(argc == 1) ls(".");
