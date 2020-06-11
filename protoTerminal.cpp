@@ -16,24 +16,37 @@
 using namespace std;
 
 //Map to store the function pointers
-map<string,void(*)(char(*))> mapa;
+map<string,void(*)(vector<string>)> mapa;
 set<char> possible_delimiters,special_characters;
 bool TERMINAL = true;
 char dir[FILENAME_MAX];
 
+void generate_file_name(char* filename, int size) {
+    strcpy(filename,"/tmp/");
+    for(int i = 5; i < size; i++) {
+        filename[i]=rand()%26+'A';
+    }
+    filename[size]=0;
+    return;
+}
+
 void runCommand(vector<string> command){
+    if(command.empty()) return;
 	
 	//Close the terminal
 	if(command[0] == "quit"){
 		TERMINAL = false;
 		return;
 	}
+    if(command[0] == "pwd") {
+        pwd(dir);
+    }
 
 	//run special functions
 	if(mapa.find(command[0]) != mapa.end()){
-		void (*choice)(char(*));
+		void (*choice)(vector<string>);
 		choice = mapa[command[0]];
-		choice(dir);
+		choice(command);
 	}else{
 
 		//Treat Here the | and &
@@ -42,6 +55,30 @@ void runCommand(vector<string> command){
 
 	return;
 
+}
+
+void recursive_run(vector<string> command, string stdout_dir="") {
+    for(auto it: command) {
+        printf("#%s\n",it.c_str());
+    }
+    for(int i = command.size()-1; i>=0; i--) {
+        if(command[i]=="&") {
+            //aqui é pra rodar o que tiver em args e retornar pro futuro, e chamar um fork pro que rolar antes do &
+        }
+        else if(command[i]=="|") {
+            char output[101];
+            generate_file_name(output,100);
+            vector<string> child_command(command.begin(), command.begin()+i);
+            printf("%d\n",i);
+            recursive_run(child_command,output);
+            freopen(output, "r+", stdin);
+            if(!stdout_dir.empty()) freopen(stdout_dir.c_str(), "w+", stdout);
+            vector<string> args(command.begin()+i+1, command.end());
+            runCommand(args);
+        }
+    } 
+    runCommand(command);
+    return;
 }
 
 char balance(const char* a, char del=0) {
@@ -72,7 +109,6 @@ int main(int argc, char *argv[]){
 	//Define Functions here	
 	mapa["ls"] = &ls;
 	mapa["cd"] = &cd;
-	mapa["pwd"] = &pwd;	
 	
 	//Strings
 	string currCommand;
@@ -100,6 +136,7 @@ int main(int argc, char *argv[]){
 		
 		// Readind the command and put the words in vector
 		getline(cin, currCommand);
+        if(cin.eof()) TERMINAL=false;
 		istringstream ss(currCommand);
 
         do {
@@ -120,11 +157,11 @@ int main(int argc, char *argv[]){
                 word=word+" "+next_word;
             }
 
-			command.push_back(clean_backwards(word));
-            cout << command[command.size()-1] << endl;
+            string new_word = clean_backwards(word);
+			if(!new_word.empty())command.push_back(new_word);
 		} while(ss);	
 		
 		//Call the function that treat the string and run the command
-		runCommand(command);
+		recursive_run(command);
 	}
 }

@@ -4,13 +4,16 @@
 //     if(argc == 1) ls(".");
 // 	else ls(argv[1]);
 
-void ls( char *dir){
+void ls(vector<string> args){
 	struct dirent *namelist;
 	// copia o diretorio passado
+    char dir[FILENAME_MAX];
+    if(args.size()<=1) getcwd(dir,FILENAME_MAX);
+    else strcpy(dir,args[1].c_str());
 	DIR *drt =opendir(dir);
 	if(!drt){
 		if(errno == ENOENT){
-			perror("Dictory does not exist");
+			perror("Directory does not exist");
 		} else {
 			perror("Unable to read the repository");
 			exit(EXIT_FAILURE);
@@ -26,7 +29,7 @@ void ls( char *dir){
 	std::cout << "\n";
 }
 
-void pwd(char *dir){
+void pwd(char* dir){
     std::cout << dir << "\n\n";
 }
 
@@ -38,7 +41,8 @@ void run(vector<string> commands){
 		cout << "Fork Failed\n";
 		exit(1);
 	}else if(rc == 0){
-		char *myArgs[nWords];
+		char *myArgs[nWords+1];
+        myArgs[nWords]=NULL;
 
 		for(int i=0;i<nWords;i++){
 			char* buffer = new char[commands[i].length()+1];
@@ -66,10 +70,7 @@ void run(vector<string> commands){
 
 			myArgs[i] = buffer;
 
-			if(i==nWords-1) 
-				myArgs[i] = NULL;
 		}
-			
 		execvp(myArgs[0], myArgs);
 		cout << "Isso não deve ser impresso\n";
 	}else{
@@ -84,10 +85,16 @@ void run(vector<string> commands){
 	// else cd(argv[1],s);
 
    
-void cd( char *dir){
+void cd(vector<string> args){
+    if(args.size()<=1) {
+        fprintf(stderr,"cd deve ter ao menos um parâmetro");
+        return;
+    }
+    char dir[FILENAME_MAX];
     char newDir[FILENAME_MAX];
 	char currDir[FILENAME_MAX];
 	getcwd(currDir, FILENAME_MAX);
+    strcpy(dir,args[1].c_str());
 	//pega permissao para voltar pra main
     uid_t uid = getuid();
     struct passwd* pwd = getpwuid(uid);
