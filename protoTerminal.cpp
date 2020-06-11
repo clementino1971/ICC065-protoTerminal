@@ -33,7 +33,9 @@ void runCommand(vector<string> command){
 		choice = mapa[command[0]];
 		choice(dir);
 	}else{
-		//run others functions
+
+		//Treat Here the | and &
+		run(command);
 	}
 
 	return;
