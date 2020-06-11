@@ -82,9 +82,12 @@ void run(vector<string> commands){
     // getcwd(s, FILENAME_MAX);
     // if(argc == 1) cd(".",s);
 	// else cd(argv[1],s);
+
    
-void cd(const char *dir, char * currDir){
+void cd( char *dir){
     char newDir[FILENAME_MAX];
+	char currDir[FILENAME_MAX];
+	getcwd(currDir, FILENAME_MAX);
 	//pega permissao para voltar pra main
     uid_t uid = getuid();
     struct passwd* pwd = getpwuid(uid);

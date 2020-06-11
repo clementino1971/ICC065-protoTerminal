@@ -46,7 +46,7 @@ int main(int argc, char *argv[]){
 	
 	//Define Functions here	
 	mapa["ls"] = &ls;
-	//mapa["cd"] = 
+	mapa["cd"] = &cd;
 	mapa["pwd"] = &pwd;	
 	
 	//Strings

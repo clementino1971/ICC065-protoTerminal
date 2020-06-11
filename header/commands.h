@@ -24,6 +24,6 @@ void pwd(char *dir); //da o caminho do diretorio atual
 void run(vector<string> command); //execute the commands from protoTerminal.cpp
 
 void pwd(char *dir); //da o caminho do diretorio atual 
-void cd(const char *dir, char * currDir); //muda o diretorio
+void cd( char *dir); //muda o diretorio
 
 #endif
