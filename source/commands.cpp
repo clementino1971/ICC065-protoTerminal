@@ -77,6 +77,7 @@ void run(vector<string> commands){
 		return;
 	}
 }
+
 	// colocar na main
 	// char s[FILENAME_MAX]; 
     // getcwd(s, FILENAME_MAX);
