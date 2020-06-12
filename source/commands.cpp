@@ -42,7 +42,7 @@ void ls(vector<string> args){
 }
 
 void pwd(char* dir){
-    std::cout << dir << "\n\n";
+    std::cout << dir;
 }
 
 void run(vector<string> commands){
