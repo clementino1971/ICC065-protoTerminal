@@ -51,7 +51,17 @@ void recursive_run(vector<string> command, int stdout_pipe[2]=NULL) {
     for(int i = command.size()-1; i>=0; i--) {
         if(command[i]=="&") {
             //aqui é pra rodar o que tiver em args e retornar pro futuro, e chamar um fork pro que rolar antes do &
-            return;
+            int rc = fork();
+            if(rc < 0){
+                fprintf(stderr, "Erro no fork\n");
+                exit(1);
+            }else if(rc == 0){
+                vector<string> child_command(command.begin(), command.begin()+i);
+                recursive_run(child_command);
+            }else{
+                vector<string> args(command.begin()+i+1, command.end());
+                runCommand(args);
+            }
         }
         else if(command[i]=="|") {
             vector<string> child_command(command.begin(), command.begin()+i);
