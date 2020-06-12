@@ -25,7 +25,7 @@ void runCommand(vector<string> command){
     if(command.empty()) return;
 
     if(command[0] == "pwd") {
-        pwd(dir);
+            pwd(dir);
     }
 
     //run special functions
@@ -118,15 +118,19 @@ void recursive_run(vector<string> command, int stdout_pipe[2]=NULL) {
             }
             return;
         }
-    } 
-    if(command[0] == "cd"){
-    	runCommand(command);
-	return;
     }
 
-    if(command[0] == "quit"){
-    	TERMINAL = false;
-	return;
+    if(command.size()){
+    
+        if(command[0] == "cd"){
+    	    runCommand(command);
+	        return;
+        }
+
+        if(command[0] == "quit"){
+    	    TERMINAL = false;
+	        return;
+        }
     }
 
     int rc = fork();
@@ -149,7 +153,6 @@ void recursive_run(vector<string> command, int stdout_pipe[2]=NULL) {
             close(stdout_pipe[1]);
         }
     }
-
 
     return;
 }
@@ -216,7 +219,6 @@ int main(int argc, char *argv[]){
         do {
             string word;
             ss >> word;
-
             char delimiter=balance(word.c_str());
             while(delimiter) {
                 if(!ss) {
@@ -230,10 +232,9 @@ int main(int argc, char *argv[]){
                 delimiter=balance(next_word.c_str(),delimiter);
                 word=word+" "+next_word;
             }
-
             string new_word = clean_backwards(word);
             if(!new_word.empty())command.push_back(new_word);
-        } while(ss);	
+        } while(ss);
 
         //Call the function that treat the string and run the command
         recursive_run(command);
