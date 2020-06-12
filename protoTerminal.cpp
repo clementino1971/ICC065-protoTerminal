@@ -24,11 +24,6 @@ char dir[FILENAME_MAX];
 void runCommand(vector<string> command){
     if(command.empty()) return;
 
-    //Close the terminal
-    if(command[0] == "quit"){
-        TERMINAL = false;
-        return;
-    }
     if(command[0] == "pwd") {
         pwd(dir);
     }
@@ -39,7 +34,6 @@ void runCommand(vector<string> command){
         choice = mapa[command[0]];
         choice(command);
     }else{
-
         run(command);
     }
     return;
@@ -88,9 +82,12 @@ void recursive_run(vector<string> command, int stdout_pipe[2]=NULL) {
         else if(command[i]=="|") {
             vector<string> child_command(command.begin(), command.begin()+i);
             int pipefd[2];
+
             pipe(pipefd);
             recursive_run(child_command,pipefd);
+
             int rc = fork();
+
             if(rc < 0){
                 cout << "Fork Failed\n";
                 exit(1);
@@ -103,10 +100,13 @@ void recursive_run(vector<string> command, int stdout_pipe[2]=NULL) {
                 }
                 saved_stdin=dup(0);
                 dup2(pipefd[0],0);
+
                 vector<string> args(command.begin()+i+1, command.end());
+                
                 runCommand(args);
                 dup2(saved_stdin,0);
                 close(pipefd[0]);
+
                 if(saved_stdout!=-1) dup2(saved_stdout,1);
                 kill(getpid(), SIGTERM);
             }
@@ -119,6 +119,16 @@ void recursive_run(vector<string> command, int stdout_pipe[2]=NULL) {
             return;
         }
     } 
+    if(command[0] == "cd"){
+    	runCommand(command);
+	return;
+    }
+
+    if(command[0] == "quit"){
+    	TERMINAL = false;
+	return;
+    }
+
     int rc = fork();
     if(rc < 0){
         cout << "Fork Failed\n";
@@ -139,6 +149,8 @@ void recursive_run(vector<string> command, int stdout_pipe[2]=NULL) {
             close(stdout_pipe[1]);
         }
     }
+
+
     return;
 }
 

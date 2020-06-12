@@ -14,6 +14,10 @@
 #include<sys/stat.h>
 #include<fcntl.h>
 #include <pwd.h>
+#define ANSI_COLOR_CYAN    "\x1b[36m"
+#define ANSI_COLOR_RESET   "\x1b[0m"
+#define STYLE_BOLD         "\033[1m"
+#define STYLE_NO_BOLD      "\033[22m"
 
 using namespace std;
 
