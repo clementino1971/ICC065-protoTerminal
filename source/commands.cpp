@@ -77,6 +77,7 @@ void run(vector<string> commands){
 
 
 void cd(vector<string> args){
+	
     if(args.size()<=1) {
         fprintf(stderr,"cd deve ter ao menos um parâmetro");
         return;
@@ -86,17 +87,19 @@ void cd(vector<string> args){
     char currDir[FILENAME_MAX];
     getcwd(currDir, FILENAME_MAX);
     strcpy(dir,args[1].c_str());
+ 
     //pega permissao para voltar pra main
     uid_t uid = getuid();
     struct passwd* pwd = getpwuid(uid);
     //comando pra voltar pra main
     if(dir=="." || dir=="$HOME" || dir =="~"){
         chdir(pwd->pw_dir);
-    }else{
+    }else{    
         chdir(dir);
     }
     //verifica se o diretorio eh valido
     getcwd(newDir, FILENAME_MAX);
+		
     if(strcmp(currDir,newDir) != 0) strcpy(currDir,newDir);
     else std::cout<<"cd:"<< dir <<": No such file or directory"<<"\n";
 }

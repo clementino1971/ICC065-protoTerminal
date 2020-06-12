@@ -24,11 +24,6 @@ char dir[FILENAME_MAX];
 void runCommand(vector<string> command){
     if(command.empty()) return;
 
-    //Close the terminal
-    if(command[0] == "quit"){
-        TERMINAL = false;
-        return;
-    }
     if(command[0] == "pwd") {
         pwd(dir);
     }
@@ -39,7 +34,6 @@ void runCommand(vector<string> command){
         choice = mapa[command[0]];
         choice(command);
     }else{
-
         run(command);
     }
     return;
@@ -119,6 +113,16 @@ void recursive_run(vector<string> command, int stdout_pipe[2]=NULL) {
             return;
         }
     } 
+    if(command[0] == "cd"){
+    	runCommand(command);
+	return;
+    }
+
+    if(command[0] == "quit"){
+    	TERMINAL = false;
+	return;
+    }
+
     int rc = fork();
     if(rc < 0){
         cout << "Fork Failed\n";
@@ -139,6 +143,8 @@ void recursive_run(vector<string> command, int stdout_pipe[2]=NULL) {
             close(stdout_pipe[1]);
         }
     }
+
+
     return;
 }
 
