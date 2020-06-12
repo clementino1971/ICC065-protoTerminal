@@ -1,9 +1,9 @@
 # ICC065-protoTerminal
 * **Developers**:
-  * Marcos Paulo Lopes ([@Marcoszz](https://github.com/Marcoszz))
-  * Fernando Neves Nogueira ([@foolnando](https://github.com/foolnando))
-  * Felipe Pereira Franco ([@felipovysk](https://github.com/felipovysk))
-  * Thailsson Clementino ([@clementino1971](https://github.com/clementino1971))
+  * Marcos Paulo Lopes ([@Marcoszz](https://github.com/Marcoszz)) - 21850690
+  * Fernando Neves Nogueira ([@foolnando](https://github.com/foolnando)) - 21853994
+  * Felipe Pereira Franco ([@felipovysk](https://github.com/felipovysk)) - 21851567
+  * Thailsson Clementino ([@clementino1971](https://github.com/clementino1971)) - 21850695
   
   ***
   
