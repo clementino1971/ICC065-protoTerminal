@@ -82,17 +82,6 @@ void run(vector<string> commands){
     execvp(myArgs[0], myArgs);
     return;
 }
-<<<<<<< HEAD
-
-	// colocar na main
-	// char s[FILENAME_MAX]; 
-    // getcwd(s, FILENAME_MAX);
-    // if(argc == 1) cd(".",s);
-	// else cd(argv[1],s);
-
-   
-void cd( char *dir){
-=======
 // colocar na main
 // char s[FILENAME_MAX]; 
 // getcwd(s, FILENAME_MAX);
@@ -109,7 +98,6 @@ void cd(vector<string> args){
     }
 
     char dir[FILENAME_MAX];
->>>>>>> posicao-fetal
     char newDir[FILENAME_MAX];
     char currDir[FILENAME_MAX];
 
