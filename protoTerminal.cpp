@@ -23,27 +23,26 @@ char dir[FILENAME_MAX];
 
 void runCommand(vector<string> command){
     if(command.empty()) return;
-	
-	//Close the terminal
-	if(command[0] == "quit"){
-		TERMINAL = false;
-		return;
-	}
+
+    //Close the terminal
+    if(command[0] == "quit"){
+        TERMINAL = false;
+        return;
+    }
     if(command[0] == "pwd") {
         pwd(dir);
     }
 
-	//run special functions
-	if(mapa.find(command[0]) != mapa.end()){
-		void (*choice)(vector<string>);
-		choice = mapa[command[0]];
-		choice(command);
-	}else{
+    //run special functions
+    if(mapa.find(command[0]) != mapa.end()){
+        void (*choice)(vector<string>);
+        choice = mapa[command[0]];
+        choice(command);
+    }else{
 
-		run(command);
-	}
-
-	return;
+        run(command);
+    }
+    return;
 
 }
 
@@ -58,10 +57,33 @@ void recursive_run(vector<string> command, int stdout_pipe[2]=NULL) {
             }else if(rc == 0){
                 vector<string> child_command(command.begin(), command.begin()+i);
                 recursive_run(child_command);
+                kill(getpid(), SIGTERM);
             }else{
-                vector<string> args(command.begin()+i+1, command.end());
-                runCommand(args);
+                signal(SIGCHLD, SIG_IGN);
+                rc = fork();
+                if(rc<0) {
+                    fprintf(stderr,"Erro no fork\n");
+                }
+                else if(rc==0) {
+                    int saved_stdout=-1;
+                    if(stdout_pipe!=NULL) {
+                        saved_stdout = dup(1);
+                        dup2(stdout_pipe[1],1);
+                    }
+                    vector<string> args(command.begin()+i+1, command.end());
+                    runCommand(args);
+                    if(saved_stdout!=-1) dup2(saved_stdout,1);
+                    kill(getpid(), SIGTERM);
+                }
+                else {
+                    int wc = waitpid(rc,NULL,0);
+                    if(stdout_pipe!=NULL) {
+                        close(stdout_pipe[1]);
+                    }
+
+                }
             }
+            return;
         }
         else if(command[i]=="|") {
             vector<string> child_command(command.begin(), command.begin()+i);
