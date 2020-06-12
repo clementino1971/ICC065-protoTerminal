@@ -16,32 +16,130 @@
 using namespace std;
 
 //Map to store the function pointers
-map<string,void(*)(char(*))> mapa;
+map<string,void(*)(vector<string>)> mapa;
 set<char> possible_delimiters,special_characters;
 bool TERMINAL = true;
 char dir[FILENAME_MAX];
 
 void runCommand(vector<string> command){
-	
-	//Close the terminal
-	if(command[0] == "quit"){
-		TERMINAL = false;
-		return;
-	}
+    if(command.empty()) return;
 
-	//run special functions
-	if(mapa.find(command[0]) != mapa.end()){
-		void (*choice)(char(*));
-		choice = mapa[command[0]];
-		choice(dir);
-	}else{
+    //Close the terminal
+    if(command[0] == "quit"){
+        TERMINAL = false;
+        return;
+    }
+    if(command[0] == "pwd") {
+        pwd(dir);
+    }
 
-		//Treat Here the | and &
-		run(command);
-	}
+    //run special functions
+    if(mapa.find(command[0]) != mapa.end()){
+        void (*choice)(vector<string>);
+        choice = mapa[command[0]];
+        choice(command);
+    }else{
 
-	return;
+        run(command);
+    }
+    return;
 
+}
+
+void recursive_run(vector<string> command, int stdout_pipe[2]=NULL) {
+    for(int i = command.size()-1; i>=0; i--) {
+        if(command[i]=="&") {
+            //aqui é pra rodar o que tiver em args e retornar pro futuro, e chamar um fork pro que rolar antes do &
+            int rc = fork();
+            if(rc < 0){
+                fprintf(stderr, "Erro no fork\n");
+                exit(1);
+            }else if(rc == 0){
+                vector<string> child_command(command.begin(), command.begin()+i);
+                recursive_run(child_command);
+                kill(getpid(), SIGTERM);
+            }else{
+                signal(SIGCHLD, SIG_IGN);
+                rc = fork();
+                if(rc<0) {
+                    fprintf(stderr,"Erro no fork\n");
+                }
+                else if(rc==0) {
+                    int saved_stdout=-1;
+                    if(stdout_pipe!=NULL) {
+                        saved_stdout = dup(1);
+                        dup2(stdout_pipe[1],1);
+                    }
+                    vector<string> args(command.begin()+i+1, command.end());
+                    runCommand(args);
+                    if(saved_stdout!=-1) dup2(saved_stdout,1);
+                    kill(getpid(), SIGTERM);
+                }
+                else {
+                    int wc = waitpid(rc,NULL,0);
+                    if(stdout_pipe!=NULL) {
+                        close(stdout_pipe[1]);
+                    }
+
+                }
+            }
+            return;
+        }
+        else if(command[i]=="|") {
+            vector<string> child_command(command.begin(), command.begin()+i);
+            int pipefd[2];
+            pipe(pipefd);
+            recursive_run(child_command,pipefd);
+            int rc = fork();
+            if(rc < 0){
+                cout << "Fork Failed\n";
+                exit(1);
+            } else if(rc == 0){
+                int saved_stdout=-1;
+                int saved_stdin=-1;
+                if(stdout_pipe!=NULL) {
+                    saved_stdout = dup(1);
+                    dup2(stdout_pipe[1],1);
+                }
+                saved_stdin=dup(0);
+                dup2(pipefd[0],0);
+                vector<string> args(command.begin()+i+1, command.end());
+                runCommand(args);
+                dup2(saved_stdin,0);
+                close(pipefd[0]);
+                if(saved_stdout!=-1) dup2(saved_stdout,1);
+                kill(getpid(), SIGTERM);
+            }
+            else {
+                int wc = wait(NULL);
+                if(stdout_pipe!=NULL) {
+                    close(stdout_pipe[1]);
+                }
+            }
+            return;
+        }
+    } 
+    int rc = fork();
+    if(rc < 0){
+        cout << "Fork Failed\n";
+        exit(1);
+    } else if(rc == 0){
+        int saved_stdout=-1;
+        if(stdout_pipe!=NULL) {
+            saved_stdout = dup(1);
+            dup2(stdout_pipe[1],1);
+        }
+        runCommand(command);
+        if(saved_stdout!=-1) dup2(saved_stdout,1);
+        kill(getpid(), SIGTERM);
+    }
+    else {
+        int wc = wait(NULL);
+        if(stdout_pipe!=NULL) {
+            close(stdout_pipe[1]);
+        }
+    }
+    return;
 }
 
 char balance(const char* a, char del=0) {
@@ -68,14 +166,13 @@ string clean_backwards(string a) {
 }
 
 int main(int argc, char *argv[]){
-	
-	//Define Functions here	
-	mapa["ls"] = &ls;
-	mapa["cd"] = &cd;
-	mapa["pwd"] = &pwd;	
-	
-	//Strings
-	string currCommand;
+
+    //Define Functions here	
+    mapa["ls"] = &ls;
+    mapa["cd"] = &cd;
+
+    //Strings
+    string currCommand;
 
     //Defining delimiters
     possible_delimiters.insert('\'');
@@ -87,24 +184,25 @@ int main(int argc, char *argv[]){
     special_characters.insert('"');
 
 
-	while(TERMINAL){
-		
-		//Get current dir
-		getcwd(dir,sizeof(dir));
+    while(TERMINAL){
 
-		//Vector to store the words in a command
-		vector<string> command;
+        //Get current dir
+        getcwd(dir,sizeof(dir));
 
-		//A print because is nice
-		cout << dir << "> ";
-		
-		// Readind the command and put the words in vector
-		getline(cin, currCommand);
-		istringstream ss(currCommand);
+        //Vector to store the words in a command
+        vector<string> command;
+
+        //A print because is nice
+        cout << dir << "> ";
+
+        // Readind the command and put the words in vector
+        getline(cin, currCommand);
+        if(cin.eof()) TERMINAL=false;
+        istringstream ss(currCommand);
 
         do {
-			string word;
-			ss >> word;
+            string word;
+            ss >> word;
 
             char delimiter=balance(word.c_str());
             while(delimiter) {
@@ -120,11 +218,11 @@ int main(int argc, char *argv[]){
                 word=word+" "+next_word;
             }
 
-			command.push_back(clean_backwards(word));
-            cout << command[command.size()-1] << endl;
-		} while(ss);	
-		
-		//Call the function that treat the string and run the command
-		runCommand(command);
-	}
+            string new_word = clean_backwards(word);
+            if(!new_word.empty())command.push_back(new_word);
+        } while(ss);	
+
+        //Call the function that treat the string and run the command
+        recursive_run(command);
+    }
 }
